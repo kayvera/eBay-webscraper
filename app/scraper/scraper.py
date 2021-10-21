@@ -55,8 +55,13 @@ class Scraper:
                     "Bid_Count": bid_count.getText(),
                 }
             )
+        return data
 
-        print(json.dumps(data, indent=2, ensure_ascii=False))
+    def create_json_file(data):
+        json_file = open("test.json", "w")
+        json.dump(data, json_file, indent=2)
+        json_file.close()
+        print("File created successfully")
 
 
 if __name__ == "__main__":
@@ -65,10 +70,14 @@ if __name__ == "__main__":
     CATEGORIES = {
         1: "Apple-Cell-Phones-Smartphones/9355/bn_319682?LH_Auction=1&rt=nc",
         2: "Samsung-Cell-Phones-and-Smartphones/9355/bn_352130?LH_Auction=1&rt=nc",
-        3: "Google-Cell-Phones-Smartphones/9355/bn_3904160",
-        4: "LG-Cell-Phones-and-Smartphones/9355/bn_353985",
+        3: "Google-Cell-Phones-Smartphones/9355/bn_3904160?LH_Auction=1&rt=nc",
+        4: "LG-Cell-Phones-and-Smartphones/9355/bn_353985?LH_Auction=1&rt=nc",
     }
+
+    JSON_FILES = ["apple.json", "samsung.json", "google.json", "lg.json"]
+
     Scraper.display_menu()
     category_url = Scraper.get_category_choice()
     soup = Scraper.scrape_category(category_url)
-    Scraper.extract_product_info(soup)
+    data = Scraper.extract_product_info(soup)
+    Scraper.create_json_file(data)
