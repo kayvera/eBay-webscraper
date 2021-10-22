@@ -4,35 +4,18 @@ from bs4 import BeautifulSoup
 
 
 class Scraper:
-    def display_menu():
-        print("Choose category to scrape: ")
-        print("1. iPhone")
-        print("2. Samsung")
-        print("3. Google")
-        print("4. LG")
-
-    def get_category_choice():
-        choice = int(input("Enter choice: "))
+    def scrape_category():
         try:
-            category_url = CATEGORIES[choice]
-        except KeyError:
-            print("Wrong Choice Entered.")
-            exit(1)
-        return category_url
+            for url, filename in zip(CATEGORIES, JSON_FILES):
+                soup = BeautifulSoup(requests.get(BASE_URL + url).text, "lxml")
+                data = Scraper.extract_product_info(soup)
+                with open("data/" + filename, "w+") as json_file:
+                    json.dump(data, json_file, indent=2)
+            print("Files created successfully!")
 
-    def extract_source(url):
-        source = requests.get(url).text
-        return source
-
-    def scrape_category(category_url):
-        try:
-            soup = BeautifulSoup(
-                Scraper.extract_source(BASE_URL + category_url), "lxml"
-            )
         except ConnectionError:
             print("Couldn't connect to ebay.com! Please try again.")
             exit(1)
-        return soup
 
     def extract_product_info(soup):
         title = soup.find_all("h3", class_="s-item__title")
@@ -57,27 +40,17 @@ class Scraper:
             )
         return data
 
-    def create_json_file(data):
-        json_file = open("test.json", "w")
-        json.dump(data, json_file, indent=2)
-        json_file.close()
-        print("File created successfully")
-
 
 if __name__ == "__main__":
     BASE_URL = "https://www.ebay.com/b/"
 
-    CATEGORIES = {
-        1: "Apple-Cell-Phones-Smartphones/9355/bn_319682?LH_Auction=1&rt=nc",
-        2: "Samsung-Cell-Phones-and-Smartphones/9355/bn_352130?LH_Auction=1&rt=nc",
-        3: "Google-Cell-Phones-Smartphones/9355/bn_3904160?LH_Auction=1&rt=nc",
-        4: "LG-Cell-Phones-and-Smartphones/9355/bn_353985?LH_Auction=1&rt=nc",
-    }
+    CATEGORIES = [
+        "Apple-Cell-Phones-Smartphones/9355/bn_319682?LH_Auction=1&rt=nc",
+        "Samsung-Cell-Phones-and-Smartphones/9355/bn_352130?LH_Auction=1&rt=nc",
+        "Google-Cell-Phones-Smartphones/9355/bn_3904160?LH_Auction=1&rt=nc",
+        "LG-Cell-Phones-and-Smartphones/9355/bn_353985?LH_Auction=1&rt=nc",
+    ]
 
     JSON_FILES = ["apple.json", "samsung.json", "google.json", "lg.json"]
 
-    Scraper.display_menu()
-    category_url = Scraper.get_category_choice()
-    soup = Scraper.scrape_category(category_url)
-    data = Scraper.extract_product_info(soup)
-    Scraper.create_json_file(data)
+    Scraper.scrape_category()
